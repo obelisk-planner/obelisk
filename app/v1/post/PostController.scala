@@ -1,11 +1,11 @@
 package v1.post
 
 import javax.inject.Inject
-
 import play.api.Logger
 import play.api.data.Form
 import play.api.libs.json.Json
 import play.api.mvc._
+import v1.solver.Planner
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,6 +32,11 @@ class PostController @Inject()(cc: PostControllerComponents)(implicit ec: Execut
 
   def index: Action[AnyContent] = PostAction.async { implicit request =>
     logger.trace("index: ")
+
+    val planner = new Planner()
+    val result = planner.example()
+    logger.info(s"result is $result")
+
     postResourceHandler.find.map { posts =>
       Ok(Json.toJson(posts))
     }

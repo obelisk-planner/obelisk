@@ -23,7 +23,7 @@ libraryDependencies += "io.gatling.highcharts" % "gatling-charts-highcharts" % g
 libraryDependencies += "io.gatling" % "gatling-test-framework" % gatlingVersion(scalaBinaryVersion.value) % Test
 
 // CLP-Java
-libraryDependencies += "com.quantego" %% "clp-java" % "1.16.09"
+libraryDependencies += "com.quantego" % "clp-java" % "1.16.10"
 
 // The Play project itself
 lazy val root = (project in file("."))
@@ -31,14 +31,6 @@ lazy val root = (project in file("."))
   .configs(GatlingTest)
   .settings(inConfig(GatlingTest)(Defaults.testSettings): _*)
   .settings(
-    name := """play-scala-rest-api-example""",
+    name := """obelisk""",
     scalaSource in GatlingTest := baseDirectory.value / "/gatling/simulation"
-  )
-
-// Documentation for this project:
-//    sbt "project docs" "~ paradox"
-//    open docs/target/paradox/site/index.html
-lazy val docs = (project in file("docs")).enablePlugins(ParadoxPlugin).
-  settings(
-    paradoxProperties += ("download_url" -> "https://example.lightbend.com/v1/download/play-rest-api")
   )

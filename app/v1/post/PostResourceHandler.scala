@@ -33,8 +33,8 @@ object PostResource {
   * Controls access to the backend data, returning [[PostResource]]
   */
 class PostResourceHandler @Inject()(
-    routerProvider: Provider[PostRouter],
-    postRepository: PostRepository)(implicit ec: ExecutionContext) {
+                                     routerProvider: Provider[PostRouter],
+                                     postRepository: PostRepository)(implicit ec: ExecutionContext) {
 
   def create(postInput: PostFormInput)(implicit mc: MarkerContext): Future[PostResource] = {
     val data = PostData(PostId("999"), postInput.title, postInput.body)

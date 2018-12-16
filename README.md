@@ -35,3 +35,21 @@ ctr_3: + x_3 <= 0.25
 Bounds
 End
 ```
+
+This was just from a copy-paste from here: http://qaru.site/questions/13824478/example-how-to-use-clp-java
+
+And in application log you should see something like:
+
+```
+Coin0506I Presolve 0 (-4) rows, 0 (-4) columns and 0 (-4) elements
+Clp3002W Empty problem - 0 rows, 0 columns and 0 elements
+Clp0000I Optimal - objective value 0
+Coin0511I After Postsolve, objective 0, infeasibilities - dual 0 (0), primal 0 (0)
+Clp0032I Optimal objective 0 - 0 iterations time 0.002, Presolve 0.00
+Coin0506I Presolve 0 (-4) rows, 0 (-4) columns and 0 (-4) elements
+Clp3002W Empty problem - 0 rows, 0 columns and 0 elements
+Clp0000I Optimal - objective value 0
+Coin0511I After Postsolve, objective 0, infeasibilities - dual 0 (0), primal 0 (0)
+Clp0032I Optimal objective 0 - 0 iterations time 0.002, Presolve 0.00
+
+```

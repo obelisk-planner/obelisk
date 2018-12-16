@@ -2,7 +2,7 @@ package v1.solver
 
 import com.quantego.clp.CLP
 
-class Planner {
+class Solver {
 
   def example(): String = {
     val model = new CLP().verbose(1)

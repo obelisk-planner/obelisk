@@ -26,7 +26,7 @@ class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: E
   def solverResult: Action[AnyContent] = SolverAction.async { implicit request =>
     logger.trace("solverResult: ")
 
-    val planner = new Planner()
+    val planner = new Solver()
     val result = planner.example()
     logger.info(s"result is $result")
 

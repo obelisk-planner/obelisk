@@ -1,4 +1,4 @@
-#Obelisk Planner
+# Obelisk Planner
 
 This is written in Scala using Play framework.
 

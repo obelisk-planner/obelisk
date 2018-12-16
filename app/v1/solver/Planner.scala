@@ -4,7 +4,7 @@ import com.quantego.clp.CLP
 
 class Planner {
 
-  def example(): CLP.STATUS = {
+  def example(): String = {
     val model = new CLP().verbose(1)
     val energy = model.addVariable()
     val executionTime = model.addVariable()
@@ -18,6 +18,7 @@ class Planner {
     model.createExpression.add(ramUsage).leq(0.25)
 
     model.minimize()
+    model.toString
   }
 
 

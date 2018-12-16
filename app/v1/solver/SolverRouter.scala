@@ -19,7 +19,7 @@ class SolverRouter @Inject()(controller: SolverController) extends SimpleRouter 
 
   override def routes: Routes = {
     case GET(p"/") =>
-      controller.index
+      controller.solverResult
   }
 
 }

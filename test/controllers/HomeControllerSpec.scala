@@ -12,7 +12,7 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest {
       val request = FakeRequest(GET, "/").withHeaders(HOST -> "localhost:9000").withCSRFToken
       val home = route(app, request).get
 
-      contentAsString(home) must include ("This is a placeholder page to show you the REST API.")
+      contentAsString(home) must include ("Obelisk REST API")
     }
 
   }

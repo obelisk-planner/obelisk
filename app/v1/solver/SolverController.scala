@@ -27,7 +27,27 @@ class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: E
     logger.trace("solverResult: ")
 
     val planner = new Solver()
-    val result = planner.example()
+
+    // TODO: hardcoded examples, remove these later
+    // nResurces to be replaced with the number of resource types in the OCE data.
+    val nResources = 2
+    // constraints to be generated from OCE recipes. This is a list (with an entry for each resource type)
+    // of lists of 2-tuples, each of the format (recipe index, resource production).
+    // Resource production indicates consumption when negative.
+    val constraints : List[List[(Int,Double)]] = List(List((0,-2)),List((0,3),(1,-1)))
+
+    // naturalProduction to be replaced with relevent data. I'm not actually sure what this corresponds to
+    // in OCE. Suppliers, maybe? Hopefully something.
+    val naturalProduction : List[Double] = List(1,0)
+    // User defined utility. Replace with relevant data.
+    val utility : List[Double] = List(0,1)
+
+    val result = planner.solve(
+      nResources = nResources,
+      constraints = constraints,
+      naturalProduction = naturalProduction,
+      utility = utility
+    )
     logger.info(s"result is $result")
 
     Future(Ok(result))

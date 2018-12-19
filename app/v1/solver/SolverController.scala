@@ -30,7 +30,7 @@ class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: E
 
     // TODO: hardcoded examples, remove these later
     // nResurces to be replaced with the number of resource types in the OCE data.
-    val nResources = 2
+    val nRecipes = 2
     // constraints to be generated from OCE recipes. This is a list (with an entry for each resource type)
     // of lists of 2-tuples, each of the format (recipe index, resource production).
     // Resource production indicates consumption when negative.
@@ -43,7 +43,7 @@ class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: E
     val utility : List[Double] = List(0,1)
 
     val result = planner.solve(
-      nResources = nResources,
+      nRecipes = nRecipes,
       constraints = constraints,
       naturalProduction = naturalProduction,
       utility = utility

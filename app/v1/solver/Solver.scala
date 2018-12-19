@@ -8,13 +8,12 @@ import scala.collection.JavaConverters._
 
 class Solver {
 
-  def solve(nResources: Int,
+  def solve(nRecipes: Int,
             constraints: List[List[(Int,Double)]],
             naturalProduction: List[Double],
             utility: List[Double]
            ): String = {
 
-    val nRecipes = constraints.length
     val model = new CLP().verbose(1)
     val variables = List.fill(nRecipes)(model.addVariable())
     

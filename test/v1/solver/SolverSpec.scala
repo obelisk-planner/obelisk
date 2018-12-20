@@ -5,8 +5,8 @@ import org.scalatest.FlatSpec
 class SolverSpec extends FlatSpec {
 
   "Solver" should "solve basic example" in {
-    // nResurces to be replaced with the number of resource types in the OCE data.
-    val nResources = 2
+    // nRecioes to be replaced with the number of resource types in the OCE data.
+    val nRecipes = 2
     // constraints to be generated from OCE recipes. This is a list (with an entry for each resource type)
     // of lists of 2-tuples, each of the format (recipe index, resource production).
     // Resource production indicates consumption when negative.
@@ -21,7 +21,7 @@ class SolverSpec extends FlatSpec {
 
     val solver = new Solver()
     solver.solve(
-      nResources = nResources,
+      nRecipes = nRecipes,
       constraints = constraints,
       naturalProduction = naturalProduction,
       utility = utility
@@ -29,8 +29,8 @@ class SolverSpec extends FlatSpec {
   }
 
   "Solver" should "solve another basic example" in {
-    // nResurces to be replaced with the number of resource types in the OCE data.
-    val nResources = 100
+    // nRecioes to be replaced with the number of resource types in the OCE data.
+    val nRecipes = 20
     // constraints to be generated from OCE recipes. This is a list (with an entry for each resource type)
     // of lists of 2-tuples, each of the format (recipe index, resource production).
     // Resource production indicates consumption when negative.
@@ -49,7 +49,7 @@ class SolverSpec extends FlatSpec {
 
     val solver = new Solver()
     solver.solve(
-      nResources = nResources,
+      nRecipes = nRecipes,
       constraints = constraints,
       naturalProduction = naturalProduction,
       utility = utility

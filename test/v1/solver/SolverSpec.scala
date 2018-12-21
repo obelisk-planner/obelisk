@@ -5,55 +5,65 @@ import org.scalatest.FlatSpec
 class SolverSpec extends FlatSpec {
 
   "Solver" should "solve basic example" in {
-    // nRecipes to be replaced with the number of recipes in the OCE data.
-    val nRecipes = 2
-    // constraints to be generated from OCE recipes. This is a list (with an entry for each resource type)
-    // of lists of 2-tuples, each of the format (recipe index, resource production).
-    // Resource production indicates consumption when negative.
-    val constraints : List[List[(Int,Double)]] = List(List((0,-2)),List((0,3),(1,-1)))
 
-    // naturalProduction to be replaced with relevent data. I'm not actually sure what this corresponds to
-    // in OCE. Suppliers, maybe? Hopefully something.
-    val naturalProduction : List[Double] = List(1,0)
+    // Resources
+    val waterResource = Resource(id = 1, name = "Water", measurementUnit = "Cup")
+    val iceResource = Resource(id = 2, name = "Ice", measurementUnit = "Cube")
+
+    // Recipes
+    val freezingRecipe = Recipe(
+      id = 1,
+      name = "Freezing",
+      production = List(
+        ResourceProduction(
+         resource = waterResource,
+          production = -2,
+          naturalProduction = 1
+        ),
+        ResourceProduction(
+          resource = iceResource,
+          production = 3,
+          naturalProduction = 0
+        )
+      )
+    )
+
+    val iceConsumptionRecipe = Recipe(
+      id = 2,
+      name = "Ice Consumption",
+      production = List(
+        ResourceProduction(
+          resource = iceResource,
+          production = -1,
+          naturalProduction = 0
+        )
+      )
+    )
+
+    val recipes = List(freezingRecipe, iceConsumptionRecipe)
+
     // User defined utility. Replace with relevant data.
-    val utility : List[Double] = List(0,1)
-
+    val utilities = List(
+      ResourceUtility(
+        resource = waterResource,
+        utility = 0
+      ),
+      ResourceUtility(
+        resource = iceResource,
+        utility = 1
+      )
+    )
 
     val solver = new Solver()
-    solver.solve(
-      nRecipes = nRecipes,
-      constraints = constraints,
-      naturalProduction = naturalProduction,
-      utility = utility
-    )
-  }
-
-  "Solver" should "solve another basic example" in {
-    // nRecipes to be replaced with the number of recipes in the OCE data.
-    val nRecipes = 20
-    // constraints to be generated from OCE recipes. This is a list (with an entry for each resource type)
-    // of lists of 2-tuples, each of the format (recipe index, resource production).
-    // Resource production indicates consumption when negative.
-    val constraints : List[List[(Int,Double)]] = List(
-      List( (0,-2) ),
-      List( (0,3), (1,-1) ),
-      List( (0,6), (1,5) )
+    val result = solver.solve(
+      recipes = recipes,
+      utilities = utilities
     )
 
-    // naturalProduction to be replaced with relevent data. I'm not actually sure what this corresponds to
-    // in OCE. Suppliers, maybe? Hopefully something.
-    val naturalProduction : List[Double] = List(1,0)
-    // User defined utility. Replace with relevant data.
-    val utility : List[Double] = List(0,2)
-
-
-    val solver = new Solver()
-    solver.solve(
-      nRecipes = nRecipes,
-      constraints = constraints,
-      naturalProduction = naturalProduction,
-      utility = utility
-    )
+    // Test
+    assert(result.objectiveValue == -1.5)
+    assert(result.recipeSolutions(0).solution == 0.5)
+    assert(result.recipeSolutions(1).solution == 1.5)
   }
 
 }

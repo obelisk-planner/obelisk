@@ -9,7 +9,7 @@ import play.api.routing.sird._
   * Routes and URLs to the PostResource controller.
   */
 class SolverRouter @Inject()(controller: SolverController) extends SimpleRouter {
-  val prefix = "/v1/solver"
+  val prefix = "/v1/recipes"
 
   def link(id: SolverId): String = {
     import com.netaporter.uri.dsl._
@@ -18,8 +18,11 @@ class SolverRouter @Inject()(controller: SolverController) extends SimpleRouter 
   }
 
   override def routes: Routes = {
-    case GET(p"/") =>
-      controller.solverResult
+    case GET(p"/example") =>
+      controller.solverExample
+
+    case POST(p"/") =>
+      controller.process
   }
 
 }

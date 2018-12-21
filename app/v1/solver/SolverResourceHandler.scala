@@ -35,7 +35,7 @@ class SolverResourceHandler @Inject()(
                                        routerProvider: Provider[SolverRouter],
                                        solverRepository: SolverRepository)(implicit ec: ExecutionContext) {
 
-  def create(solverInput: SolverFormInput)(implicit mc: MarkerContext): Future[SolverResource] = {
+  def create(solverInput: SolverData)(implicit mc: MarkerContext): Future[SolverResource] = {
     val data = SolverData(SolverId("999"), solverInput.title, solverInput.body)
     // We don't actually create the post, so return what we have
     solverRepository.create(data).map { id =>

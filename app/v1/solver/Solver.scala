@@ -6,13 +6,11 @@ import com.quantego.clp.CLPVariable
 
 import scala.collection.JavaConverters._
 
-case class Resource(id: Long,
-                    name: String,
-                    measurementUnit: String)
-
-case class Recipe(id: Int, name: String, production: List[ResourceProduction])
+case class Resource(id: Long, name: String, measurementUnit: String)
 
 case class ResourceProduction(resource: Resource, production: Double, naturalProduction: Double)
+
+case class Recipe(id: Int, name: String, production: List[ResourceProduction])
 
 case class RecipeResourceProduction(resourceProduction: ResourceProduction, recipeId: Int)
 

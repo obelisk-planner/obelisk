@@ -2,12 +2,10 @@ package v1.solver
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, Json, Reads}
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.{ExecutionContext, Future}
-
-case class SolverFormInput(title: String, body: String)
 
 class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: ExecutionContext)
   extends SolverBaseController(cc) {
@@ -23,7 +21,7 @@ class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: E
     }
   }
 
-  def solverResult: Action[AnyContent] = SolverAction.async { implicit request =>
+  def solverExample: Action[AnyContent] = SolverAction.async { implicit request =>
 
     // TODO: hardcoded examples, remove these later
 
@@ -64,6 +62,45 @@ class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: E
     val recipes = List(freezingRecipe, iceConsumptionRecipe)
 
     // User defined utility. Replace with relevant data.
+    val utilities = List(
+      ResourceUtility(
+        resource = waterResource,
+        utility = 0
+      ),
+      ResourceUtility(
+        resource = iceResource,
+        utility = 1
+      )
+    )
+
+    val solver = new Solver()
+    val result = solver.solve(
+      recipes = recipes,
+      utilities = utilities
+    )
+
+    Future(Ok(s"Result is: $result"))
+  }
+
+  // This helper parses and validates JSON using the implicit `placeReads`
+  // above, returning errors if the parsed json fails validation.
+  def validateJson[A : Reads] = parse.json.validate(
+    _.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e)))
+  )
+
+  implicit val resourceReads = Json.reads[Resource]
+  implicit  val resourceProductionReads = Json.reads[ResourceProduction]
+  implicit val recipeReads = Json.reads[Recipe]
+
+  def process: Action[Seq[Recipe]] = Action(validateJson[Seq[Recipe]]).async { implicit request =>
+    logger.trace("process: ")
+    val recipes = request.body
+
+    // User defined utility. Replace with relevant data.
+    // Resources
+    val waterResource = Resource(id = 1, name = "Water", measurementUnit = "Cup")
+    val iceResource = Resource(id = 2, name = "Ice", measurementUnit = "Cube")
+
     val utilities = List(
       ResourceUtility(
         resource = waterResource,

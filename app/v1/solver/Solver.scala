@@ -3,6 +3,7 @@ package v1.solver
 import com.quantego.clp.CLP
 import com.quantego.clp.CLPConstraint
 import com.quantego.clp.CLPVariable
+
 import scala.collection.JavaConverters._
 
 case class Resource(id: Long,
@@ -12,6 +13,8 @@ case class Resource(id: Long,
 case class Recipe(id: Int, name: String, production: List[ResourceProduction])
 
 case class ResourceProduction(resource: Resource, production: Double, naturalProduction: Double)
+
+case class RecipeResourceProduction(resourceProduction: ResourceProduction, recipeId: Int)
 
 case class ResourceUtility(resource: Resource, utility: Double)
 
@@ -35,13 +38,13 @@ class Solver {
     val resourceConstraints = getResourceConstraints(recipes)
     resourceConstraints.foreach { resourceConstraint =>
       val lhs = resourceConstraint._2.flatMap { constraint =>
-        val recipeVariableOpt = recipeVariables.find(_.recipe.id == constraint._2)
+        val recipeVariableOpt = recipeVariables.find(_.recipe.id == constraint.recipeId)
         recipeVariableOpt.map { recipeVariable =>
-          (recipeVariable.clpVariable, scala.Double.box(constraint._1.production))
+          (recipeVariable.clpVariable, scala.Double.box(constraint.resourceProduction.production))
         }
       }.toMap
 
-      val naturalProduction = resourceConstraint._2.map(_._1.naturalProduction).sum
+      val naturalProduction = resourceConstraint._2.map(_.resourceProduction.naturalProduction).sum
 
       model.addConstraint(lhs.asJava, CLPConstraint.TYPE.GEQ, -naturalProduction)
     }
@@ -69,8 +72,11 @@ class Solver {
     )
   }
 
-  private def getResourceConstraints(recipes: Seq[Recipe]): Map[Resource, Seq[(ResourceProduction, Int)]] = {
-    val constraintsList = recipes.flatMap(r => r.production.map( p => (p.resource, (p, r.id))))
+  private def getResourceConstraints(recipes: Seq[Recipe]): Map[Resource, Seq[RecipeResourceProduction]] = {
+    val constraintsList = for {
+      recipe <- recipes
+      constraint <- recipe.production
+    } yield (constraint.resource, RecipeResourceProduction(constraint, recipe.id))
     constraintsList.groupBy(_._1).mapValues(_.map(_._2))
   }
 

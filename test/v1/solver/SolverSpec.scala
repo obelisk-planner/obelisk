@@ -12,6 +12,12 @@ class SolverSpec extends FlatSpec {
     val potTimeResource = Resource(id = 3, name = "Pot Time", measurementUnit = "Pot Month", naturalProduction = 1)
     val flowerResource = Resource(id = 4, name = "Flower", measurementUnit = "Item", naturalProduction = 0)
 
+    // Resources
+    val waterResource = Resource(id = 1, name = "Water", measurementUnit = "Cup", naturalProduction = 1)
+    val iceResource = Resource(id = 2, name = "Ice", measurementUnit = "Cube", naturalProduction = 0)
+    val potTimeResource = Resource(id = 3, name = "Pot Time", measurementUnit = "Pot Month", naturalProduction = 1)
+    val flowerResource = Resource(id = 4, name = "Flower", measurementUnit = "Item", naturalProduction = 0)
+
     // Recipes
     val freezingRecipe = Recipe(
       id = 1,
@@ -45,7 +51,7 @@ class SolverSpec extends FlatSpec {
       production = List(
         ResourceProduction(
           resource = waterResource,
-          production = -1,
+          production = 1,
         ),
         ResourceProduction(
           resource = potTimeResource,
@@ -69,7 +75,7 @@ class SolverSpec extends FlatSpec {
       )
     )
 
-    val recipes = List(freezingRecipe, iceConsumptionRecipe)
+    val recipes = List(freezingRecipe, iceConsumptionRecipe, flowerGrowingRecipe, flowerConsumptionRecipe)
 
     val utilities = List(
       RecipeUtility(

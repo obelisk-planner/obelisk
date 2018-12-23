@@ -64,7 +64,7 @@ class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: E
       production = List(
         ResourceProduction(
           resource = waterResource,
-          production = 1,
+          production = -1,
         ),
         ResourceProduction(
           resource = potTimeResource,

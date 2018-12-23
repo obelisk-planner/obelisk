@@ -51,7 +51,7 @@ class SolverSpec extends FlatSpec {
       production = List(
         ResourceProduction(
           resource = waterResource,
-          production = 1,
+          production = -1,
         ),
         ResourceProduction(
           resource = potTimeResource,

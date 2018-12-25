@@ -34,20 +34,37 @@ class Solver {
     val model = new CLP().verbose(1)
     val recipeVariables = recipes.map(recipe => RecipeVariable(recipe, model.addVariable()))
 
-    val resourceConstraints = getResourceConstraints(recipes)
-    resourceConstraints.foreach { resourceConstraint =>
-      val lhs = resourceConstraint._2.flatMap { constraint =>
-        val recipeVariableOpt = recipeVariables.find(_.recipe.id == constraint.recipeId)
-        recipeVariableOpt.map { recipeVariable =>
-          (recipeVariable.clpVariable, scala.Double.box(constraint.resourceProduction.production))
-        }
-      }.toMap
+    // Figure out how many resources there are in the data. If the number is readily available elsewhere, make it an input of solve and remove this.
+    
+    var nResources : Int = 0
 
-      val naturalProduction = resourceConstraint._2.map(
-        _.resourceProduction.resource.naturalProduction
-      ).sum
+    recipes.foreach(recipe => 
+      recipe.production.foreach(resourceProduction =>
+        if (resourceProduction.resource.id > nResources) (
+          nResources = resourceProduction.resource.id
+        )
+      )
+    )
 
-      model.addConstraint(lhs.asJava, CLPConstraint.TYPE.GEQ, -naturalProduction)
+    // Turn the incoming case classes into an array of resources. Generate a list of natural productions (again, replace with an input list of natural productions if convenient).
+        
+    var transposed : Array[List[(Int, Double)]] = Array.fill(nResources)(List[(Int, Double)]())
+    var naturalProduction : Array[Double] = Array.fill(nResources)(0)
+
+    recipes.foreach(recipe => 
+      recipe.production.foreach{resourceProduction =>
+        transposed(resourceProduction.resource.id-1) = (recipe.id, resourceProduction.production) :: transposed(resourceProduction.resource.id-1)
+        naturalProduction(resourceProduction.resource.id-1) = resourceProduction.resource.naturalProduction
+      }
+    )
+
+    // Input constraints.
+
+    val constPairs = transposed.zip(naturalProduction)
+
+    constPairs.foreach{ pair =>
+      val constMap : Map[CLPVariable,java.lang.Double] = pair._1.map(production => (recipeVariables(production._1-1).clpVariable,scala.Double.box(production._2))).toMap
+      val constraint = model.addConstraint(constMap.asJava,CLPConstraint.TYPE.GEQ,-pair._2)
     }
 
     // Set the objective.
@@ -72,13 +89,4 @@ class Solver {
       recipeSolutions = recipeSolutions
     )
   }
-
-  private def getResourceConstraints(recipes: Seq[Recipe]): Map[Resource, Seq[RecipeResourceProduction]] = {
-    val constraintsList = for {
-      recipe <- recipes
-      constraint <- recipe.production
-    } yield (constraint.resource, RecipeResourceProduction(constraint, recipe.id))
-    constraintsList.groupBy(_._1).mapValues(_.map(_._2))
-  }
-
 }

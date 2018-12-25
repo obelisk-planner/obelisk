@@ -2,43 +2,91 @@ package v1.solver
 
 import com.quantego.clp.CLP
 import com.quantego.clp.CLPConstraint
-import com.quantego.clp.CLPConstraint.TYPE
 import com.quantego.clp.CLPVariable
+
 import scala.collection.JavaConverters._
 
+case class Resource(id: Long, name: String, measurementUnit: String, naturalProduction: Double)
+
+case class ResourceProduction(resource: Resource, production: Double)
+
+case class Recipe(id: Int, name: String, production: List[ResourceProduction])
+
+case class RecipeResourceProduction(resourceProduction: ResourceProduction, recipeId: Int)
+
+case class RecipeUtility(recipe: Recipe, utility: Double)
+
+case class RecipeVariable(recipe: Recipe, clpVariable: CLPVariable)
+
+case class RecipeSolution(recipeName: String, solution: Double)
+
+case class SolverResult(objectiveValue: Double, recipeSolutions: Seq[RecipeSolution])
+
+
+/**
+  * Solver
+  */
 class Solver {
 
-  def solve(nRecipes: Int,
-            constraints: List[List[(Int,Double)]],
-            naturalProduction: List[Double],
-            utility: List[Double]
-           ): String = {
+
+  def solve(recipes: Seq[Recipe], utilities: Seq[RecipeUtility]): SolverResult = {
 
     val model = new CLP().verbose(1)
-    val variables = List.fill(nRecipes)(model.addVariable())
+    val recipeVariables = recipes.map(recipe => RecipeVariable(recipe, model.addVariable()))
+
+    // Figure out how many resources there are in the data. If the number is readily available elsewhere, make it an input of solve and remove this.
     
-    // Set the constraints in the model.
-    val constPairs = constraints.zip(naturalProduction)
-    def handlePairs(p:(List[(Int,Double)],Double)) : Unit = {
-        val constMap : Map[CLPVariable,java.lang.Double] = p._1.map(x => (variables.apply(x._1), scala.Double.box(x._2))).toMap
-        model.addConstraint(constMap.asJava, CLPConstraint.TYPE.GEQ,-p._2)
+    var nResources : Int = 0
+
+    recipes.foreach(recipe => 
+      recipe.production.foreach(resourceProduction =>
+        if (resourceProduction.resource.id > nResources) (
+          nResources = resourceProduction.resource.id
+        )
+      )
+    )
+
+    // Turn the incoming case classes into an array of resources. Generate a list of natural productions (again, replace with an input list of natural productions if convenient).
+        
+    var transposed : Array[List[(Int, Double)]] = Array.fill(nResources)(List[(Int, Double)]())
+    var naturalProduction : Array[Double] = Array.fill(nResources)(0)
+
+    recipes.foreach(recipe => 
+      recipe.production.foreach{resourceProduction =>
+        transposed(resourceProduction.resource.id-1) = (recipe.id, resourceProduction.production) :: transposed(resourceProduction.resource.id-1)
+        naturalProduction(resourceProduction.resource.id-1) = resourceProduction.resource.naturalProduction
+      }
+    )
+
+    // Input constraints.
+
+    val constPairs = transposed.zip(naturalProduction)
+
+    constPairs.foreach{ pair =>
+      val constMap : Map[CLPVariable,java.lang.Double] = pair._1.map(production => (recipeVariables(production._1-1).clpVariable,scala.Double.box(production._2))).toMap
+      val constraint = model.addConstraint(constMap.asJava,CLPConstraint.TYPE.GEQ,-pair._2)
     }
-    constPairs.foreach(handlePairs)
-    
+
     // Set the objective.
-    val objecPairs = variables.zip(utility)
+    val objecPairs = recipeVariables.zip(utilities)
+    objecPairs.foreach(p => inputObjec(p._1.clpVariable, p._2.utility))
     def inputObjec(b:CLPVariable, a:Double) : Unit = {
-        model.setObjectiveCoefficient(b, a)
+      model.setObjectiveCoefficient(b, a)
     }
-    objecPairs.foreach(p => inputObjec(p._1,0-p._2))
 
     // Set variable bounds.
-    variables.foreach(_.lb(0))
+    recipeVariables.foreach(_.clpVariable.lb(0))
 
     // Solve the model.
-    model.minimize()
-    model.toString
+    model.maximize()
+
+    // Return results
+    val recipeSolutions = recipeVariables.map( r =>
+      RecipeSolution(r.recipe.name, model.getSolution(r.clpVariable))
+    )
+    SolverResult(
+      objectiveValue = model.getObjectiveValue,
+      recipeSolutions = recipeSolutions
+    )
   }
-
-
 }

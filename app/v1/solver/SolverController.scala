@@ -2,12 +2,10 @@ package v1.solver
 
 import javax.inject.Inject
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, Json, Reads}
 import play.api.mvc.{Action, AnyContent}
 
 import scala.concurrent.{ExecutionContext, Future}
-
-case class SolverFormInput(title: String, body: String)
 
 class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: ExecutionContext)
   extends SolverBaseController(cc) {
@@ -23,34 +21,141 @@ class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: E
     }
   }
 
-  def solverResult: Action[AnyContent] = SolverAction.async { implicit request =>
-    logger.trace("solverResult: ")
-
-    val planner = new Solver()
+  def solverExample: Action[AnyContent] = SolverAction.async { implicit request =>
 
     // TODO: hardcoded examples, remove these later
-    // nRecipes to be replaced with the number of recipes in the OCE data.
-    val nRecipes = 2
-    // constraints to be generated from OCE recipes. This is a list (with an entry for each resource type)
-    // of lists of 2-tuples, each of the format (recipe index, resource production).
-    // Resource production indicates consumption when negative.
-    val constraints : List[List[(Int,Double)]] = List(List((0,-2)),List((0,3),(1,-1)))
 
-    // naturalProduction to be replaced with relevent data. I'm not actually sure what this corresponds to
-    // in OCE. Suppliers, maybe? Hopefully something.
-    val naturalProduction : List[Double] = List(1,0)
-    // User defined utility. Replace with relevant data.
-    val utility : List[Double] = List(0,1)
+    // Resources
+    val waterResource = Resource(id = 1, name = "Water", measurementUnit = "Cup", naturalProduction = 1)
+    val iceResource = Resource(id = 2, name = "Ice", measurementUnit = "Cube", naturalProduction = 0)
+    val potTimeResource = Resource(id = 3, name = "Pot Time", measurementUnit = "Pot Month", naturalProduction = 1)
+    val flowerResource = Resource(id = 4, name = "Flower", measurementUnit = "Item", naturalProduction = 0)
 
-    val result = planner.solve(
-      nRecipes = nRecipes,
-      constraints = constraints,
-      naturalProduction = naturalProduction,
-      utility = utility
+    // Recipes
+    val freezingRecipe = Recipe(
+      id = 1,
+      name = "Freezing",
+      production = List(
+        ResourceProduction(
+          resource = waterResource,
+          production = -2,
+        ),
+        ResourceProduction(
+          resource = iceResource,
+          production = 3,
+        )
+      )
     )
-    logger.info(s"result is $result")
 
-    Future(Ok(result))
+    val iceConsumptionRecipe = Recipe(
+      id = 2,
+      name = "Ice Consumption",
+      production = List(
+        ResourceProduction(
+          resource = iceResource,
+          production = -1,
+        )
+      )
+    )
+
+    val flowerGrowingRecipe = Recipe(
+      id = 3,
+      name = "Flower Growing",
+      production = List(
+        ResourceProduction(
+          resource = waterResource,
+          production = -1,
+        ),
+        ResourceProduction(
+          resource = potTimeResource,
+          production = -3,
+        ),
+        ResourceProduction(
+          resource = flowerResource,
+          production = 1,
+        ),
+      )
+    )
+
+    val flowerConsumptionRecipe = Recipe(
+      id = 4,
+      name = "Flower Consumption",
+      production = List(
+        ResourceProduction(
+          resource = flowerResource,
+          production = -1,
+        )
+      )
+    )
+
+    val recipes = List(freezingRecipe, iceConsumptionRecipe, flowerGrowingRecipe, flowerConsumptionRecipe)
+
+    // User defined utility. Replace with relevant data.
+    val utilities = List(
+      RecipeUtility(
+        recipe = freezingRecipe,
+        utility = 0
+      ),
+      RecipeUtility(
+        recipe = iceConsumptionRecipe,
+        utility = 1
+      ),
+      RecipeUtility(
+        recipe = flowerGrowingRecipe,
+        utility = 0
+      ),
+      RecipeUtility(
+        recipe = flowerConsumptionRecipe,
+        utility = 2
+      )
+    )
+
+    val solver = new Solver()
+    val result = solver.solve(
+      recipes = recipes,
+      utilities = utilities
+    )
+
+    Future(Ok(s"Result is: $result"))
+  }
+
+  // This helper parses and validates JSON using the implicit `placeReads`
+  // above, returning errors if the parsed json fails validation.
+  def validateJson[A : Reads] = parse.json.validate(
+    _.validate[A].asEither.left.map(e => BadRequest(JsError.toJson(e)))
+  )
+
+  implicit val resourceReads = Json.reads[Resource]
+  implicit  val resourceProductionReads = Json.reads[ResourceProduction]
+  implicit val recipeReads = Json.reads[Recipe]
+
+  def process: Action[Seq[Recipe]] = Action(validateJson[Seq[Recipe]]).async { implicit request =>
+    logger.trace("process: ")
+    val recipes = request.body
+
+    // User defined utility. Replace with relevant data.
+    // Resources
+    val waterResource = Resource(id = 1, name = "Water", measurementUnit = "Cup")
+    val iceResource = Resource(id = 2, name = "Ice", measurementUnit = "Cube")
+
+    val utilities = List(
+      ResourceUtility(
+        resource = waterResource,
+        utility = 0
+      ),
+      ResourceUtility(
+        resource = iceResource,
+        utility = 1
+      )
+    )
+
+    val solver = new Solver()
+    val result = solver.solve(
+      recipes = recipes,
+      utilities = utilities
+    )
+
+    Future(Ok(s"Result is: $result"))
   }
 
 }

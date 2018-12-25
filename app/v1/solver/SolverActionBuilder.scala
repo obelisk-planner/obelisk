@@ -16,8 +16,8 @@ import scala.concurrent.{ExecutionContext, Future}
   * This is commonly used to hold request-specific information like
   * security credentials, and useful shortcut methods.
   */
-trait SolverRequestHeader extends MessagesRequestHeader with PreferredMessagesProvider
-class SolverRequest[A](request: Request[A], val messagesApi: MessagesApi) extends WrappedRequest(request) with SolverRequestHeader
+trait RecipeRequestHeader extends MessagesRequestHeader with PreferredMessagesProvider
+class RecipeRequest[A](request: Request[A], val messagesApi: MessagesApi) extends WrappedRequest(request) with RecipeRequestHeader
 
 /**
  * Provides an implicit marker that will show the request in all logger statements.
@@ -48,23 +48,23 @@ trait RequestMarkerContext {
   */
 class SolverActionBuilder @Inject()(messagesApi: MessagesApi, playBodyParsers: PlayBodyParsers)
                                    (implicit val executionContext: ExecutionContext)
-    extends ActionBuilder[SolverRequest, AnyContent]
+    extends ActionBuilder[RecipeRequest, AnyContent]
     with RequestMarkerContext
     with HttpVerbs {
 
   override val parser: BodyParser[AnyContent] = playBodyParsers.anyContent
 
-  type PostRequestBlock[A] = SolverRequest[A] => Future[Result]
+  type RecipeRequestBlock[A] = RecipeRequest[A] => Future[Result]
 
   private val logger = Logger(this.getClass)
 
   override def invokeBlock[A](request: Request[A],
-                              block: PostRequestBlock[A]): Future[Result] = {
+                              block: RecipeRequestBlock[A]): Future[Result] = {
     // Convert to marker context and use request in block
     implicit val markerContext: MarkerContext = requestHeaderToMarkerContext(request)
     logger.trace(s"invokeBlock: ")
 
-    val future = block(new SolverRequest(request, messagesApi))
+    val future = block(new RecipeRequest(request, messagesApi))
 
     future.map { result =>
       request.method match {

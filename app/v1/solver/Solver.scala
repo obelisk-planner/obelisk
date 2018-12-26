@@ -6,7 +6,7 @@ import com.quantego.clp.CLPVariable
 
 import scala.collection.JavaConverters._
 
-case class Resource(id: Long, name: String, measurementUnit: String, naturalProduction: Double)
+case class Resource(id: Int, name: String, measurementUnit: String, naturalProduction: Double)
 
 case class ResourceProduction(resource: Resource, production: Double)
 

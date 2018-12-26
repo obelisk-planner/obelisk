@@ -135,17 +135,84 @@ class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: E
 
     // User defined utility. Replace with relevant data.
     // Resources
-    val waterResource = Resource(id = 1, name = "Water", measurementUnit = "Cup")
-    val iceResource = Resource(id = 2, name = "Ice", measurementUnit = "Cube")
+    val waterResource = Resource(id = 1, name = "Water", measurementUnit = "Cup", naturalProduction = 1)
+    val iceResource = Resource(id = 2, name = "Ice", measurementUnit = "Cube", naturalProduction = 0)
+    val potTimeResource = Resource(id = 3, name = "Pot Time", measurementUnit = "Pot Month", naturalProduction = 1)
+    val flowerResource = Resource(id = 4, name = "Flower", measurementUnit = "Item", naturalProduction = 0)
+
+    val freezingRecipe = Recipe(
+      id = 1,
+      name = "Freezing",
+      production = List(
+        ResourceProduction(
+          resource = waterResource,
+          production = -2,
+        ),
+        ResourceProduction(
+          resource = iceResource,
+          production = 3,
+        )
+      )
+    )
+
+    val iceConsumptionRecipe = Recipe(
+      id = 2,
+      name = "Ice Consumption",
+      production = List(
+        ResourceProduction(
+          resource = iceResource,
+          production = -1,
+        )
+      )
+    )
+
+    val flowerGrowingRecipe = Recipe(
+      id = 3,
+      name = "Flower Growing",
+      production = List(
+        ResourceProduction(
+          resource = waterResource,
+          production = -1,
+        ),
+        ResourceProduction(
+          resource = potTimeResource,
+          production = -3,
+        ),
+        ResourceProduction(
+          resource = flowerResource,
+          production = 1,
+        ),
+      )
+    )
+
+    val flowerConsumptionRecipe = Recipe(
+      id = 4,
+      name = "Flower Consumption",
+      production = List(
+        ResourceProduction(
+          resource = flowerResource,
+          production = -1,
+        )
+      )
+    )
+
 
     val utilities = List(
-      ResourceUtility(
-        resource = waterResource,
+      RecipeUtility(
+        recipe = freezingRecipe,
         utility = 0
       ),
-      ResourceUtility(
-        resource = iceResource,
+      RecipeUtility(
+        recipe = iceConsumptionRecipe,
         utility = 1
+      ),
+      RecipeUtility(
+        recipe = flowerGrowingRecipe,
+        utility = 0
+      ),
+      RecipeUtility(
+        recipe = flowerConsumptionRecipe,
+        utility = 2
       )
     )
 
@@ -157,5 +224,4 @@ class SolverController  @Inject()(cc: SolverControllerComponents)(implicit ec: E
 
     Future(Ok(s"Result is: $result"))
   }
-
 }

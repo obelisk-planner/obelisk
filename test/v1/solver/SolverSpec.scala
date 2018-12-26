@@ -100,8 +100,8 @@ class SolverSpec extends FlatSpec {
     assert(result.objectiveValue == -1.6666667)
     assert(result.recipeSolutions(0).solution == 0.33333333333333337)
     assert(result.recipeSolutions(1).solution == 1.0)
-    assert(result.recipeSolutions(1).solution == 0.3333333333333333)
-    assert(result.recipeSolutions(1).solution == 0.3333333333333333)
+    assert(result.recipeSolutions(2).solution == 0.3333333333333333)
+    assert(result.recipeSolutions(3).solution == 0.3333333333333333)
   }
 
 }

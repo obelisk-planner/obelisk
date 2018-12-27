@@ -23,9 +23,10 @@ class SolverSpec extends FlatSpec {
         ),
         ResourceProduction(
           resource = iceResource,
-          production = 3,
+          production = 3
         )
-      )
+      ),
+      utility = 0
     )
 
     val iceConsumptionRecipe = Recipe(
@@ -36,7 +37,8 @@ class SolverSpec extends FlatSpec {
           resource = iceResource,
           production = -1,
         )
-      )
+      ),
+      utility = 1
     )
 
     val flowerGrowingRecipe = Recipe(
@@ -55,7 +57,8 @@ class SolverSpec extends FlatSpec {
           resource = flowerResource,
           production = 1,
         ),
-      )
+      ),
+      utility = 0
     )
 
     val flowerConsumptionRecipe = Recipe(
@@ -66,35 +69,14 @@ class SolverSpec extends FlatSpec {
           resource = flowerResource,
           production = -1,
         )
-      )
+      ),
+      utility = 2
     )
 
     val recipes = List(freezingRecipe, iceConsumptionRecipe, flowerGrowingRecipe, flowerConsumptionRecipe)
 
-    val utilities = List(
-      RecipeUtility(
-        recipe = freezingRecipe,
-        utility = 0
-      ),
-      RecipeUtility(
-        recipe = iceConsumptionRecipe,
-        utility = 1
-      ),
-      RecipeUtility(
-        recipe = flowerGrowingRecipe,
-        utility = 0
-      ),
-      RecipeUtility(
-        recipe = flowerConsumptionRecipe,
-        utility = 2
-      )
-    )
-
     val solver = new Solver()
-    val result = solver.solve(
-      recipes = recipes,
-      utilities = utilities
-    )
+    val result = solver.solve(recipes)
 
     // Test
     assert(result.objectiveValue == 1.6666666666666665)

@@ -10,7 +10,7 @@ case class Resource(id: Int, name: String, measurementUnit: String, naturalProdu
 
 case class ResourceProduction(resource: Resource, production: Double)
 
-case class Recipe(id: Int, name: String, production: List[ResourceProduction])
+case class Recipe(id: Int, name: String, production: List[ResourceProduction], utility: Double)
 
 case class RecipeResourceProduction(resourceProduction: ResourceProduction, recipeId: Int)
 
@@ -29,7 +29,7 @@ case class SolverResult(objectiveValue: Double, recipeSolutions: Seq[RecipeSolut
 class Solver {
 
 
-  def solve(recipes: Seq[Recipe], utilities: Seq[RecipeUtility]): SolverResult = {
+  def solve(recipes: Seq[Recipe]): SolverResult = {
 
     val model = new CLP().verbose(1)
     val recipeVariables = recipes.map(recipe => RecipeVariable(recipe, model.addVariable()))
@@ -64,12 +64,11 @@ class Solver {
 
     constPairs.foreach{ pair =>
       val constMap : Map[CLPVariable,java.lang.Double] = pair._1.map(production => (recipeVariables(production._1-1).clpVariable,scala.Double.box(production._2))).toMap
-      val constraint = model.addConstraint(constMap.asJava,CLPConstraint.TYPE.GEQ,-pair._2)
+      model.addConstraint(constMap.asJava,CLPConstraint.TYPE.GEQ,-pair._2)
     }
 
     // Set the objective.
-    val objecPairs = recipeVariables.zip(utilities)
-    objecPairs.foreach(p => inputObjec(p._1.clpVariable, p._2.utility))
+    recipeVariables.foreach(p => inputObjec(p.clpVariable, p.recipe.utility))
     def inputObjec(b:CLPVariable, a:Double) : Unit = {
       model.setObjectiveCoefficient(b, a)
     }

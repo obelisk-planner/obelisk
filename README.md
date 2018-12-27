@@ -20,15 +20,15 @@ The main logic currently is in Solver.scala file. Here's an example of how it mi
 
 ### Example
 
-In the example data, there's two resources (let's call them water and ice) and two recipes (which we'll call freezing and ice consumption).
-Under the constraints entry for water, there's (0,-2).
-That 0 corresponds to the first recipe, freezing.
-What this says is that freezing consumes two units (let's say cups) of water.
-Note that the water entry in naturalProduction has a one, which corresponds to water being generated at a rate of one cup per unit time, perhaps from a rain barrel.
-In the constraints entry for ice, there's (0,3) and (1, -1). What the first says is that recipe 0, freezing, produces three units (cubes) of ice. The second says that recipe 1, ice consumption, consumes one cube of ice.
-Note that ice consumption has an entry of one in utility, indicating that we like having ice cubes. The algorithm will put a weight of one on maximizing ice consumption.
-The solution generated is an intensity of 0.5 for freezing and 1.5 for consumption. In practice, this would translate to freezing one cup of water every two units of time, and consuming one ice cube one unit of time and two the next.
+In the example data, there's four resources (water, ice, time in a flower pot and flowers) and four recipes (freezing, ice consumption, flower growing and flower consumption).
 
+Each recipe has a set of paramiters; an ID, a name and a list of resource productions, which in turn contain a resource and a level of production. Take a look at the freezing recipe. it has ID zero, name "freezingRecipe" and two resource productions. The first resource production is for water, and has a production of minus two. What this says is that freezing consumes two units (cups, according to the definition of water) of water. The second resource production is for ice, and contains a production level of three, which corresponds to the recipe producing three units (cubes) of ice.
+
+Each resource, in turn, contains an ID, a name, a unit of measurement and a natural production. Looking at the resource water, it has an ID of zero, a name of "Water", a unit of "Cup" and a natural production of one. Unit refers to the standardized unit with which to measure the resource, and nattural production refers to the rate at which the resource is produced "for free", as in without needing any inputs. The natural production of one corresponds to water being generated at a rate of one cup per unit time, perhaps from a rain barrel.
+
+There is also recipe utilities, which indicate when nonzero some preferance for the intensity, of number of parrelel instances of a recipe. Ice consumption has a utility entry of one, indicating that we like having ice cubes. The algorithm will put a weight of one on maximizing ice consumption.
+
+The solution generated is the intensities that maximize utility without outstripping available resources. In the example case, it's an intensity of one for ice consumption and one third for everything else. In practice, this would translate to freezing one cup of water, as well as growing and picking one flower every three months, and using one ice cube every month (it's an example).
 
 ## Running Locally
 
